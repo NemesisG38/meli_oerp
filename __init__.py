@@ -30,7 +30,8 @@ pre_init_check(cr=None)
 
 def pre_init_hook(cr, registry=None):
 
-    env = api.Environment(cr, SUPERUSER_ID, {})
+    pass;
+    #env = api.Environment(cr, SUPERUSER_ID, {})
     #env['ir.model'].search([('model', '=', 'warning')]).unlink()
 
 
