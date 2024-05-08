@@ -11,16 +11,20 @@ import sys
 import subprocess
 import pkg_resources
 
+import logging
+_logger = logging.getLogger(__name__)
+
 def pre_init_check(cr):
     required  = {'meli', 'pdf2image'}
     installed = {pkg.key for pkg in pkg_resources.working_set}
     missing   = required - installed
-
+    _logger.info("missing:"+str(missing))
     if missing:
         # implement pip as a subprocess:
         for mis in missing:
             if mis=="meli":
                 mis = "git+https://github.com/mercadolibre/python-sdk.git"
+            _logger.info("installing dependencies: "+str(mis))
             subprocess.check_call([sys.executable, '-m', 'pip', 'install', mis])
 
     return True
@@ -37,5 +41,5 @@ def pre_init_hook(cr, registry=None):
 
 from . import models
 from . import controllers
-#import wizard
+from . import wizard
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
