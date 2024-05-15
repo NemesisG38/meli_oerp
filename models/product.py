@@ -65,6 +65,13 @@ class MyHTMLParser(HTMLParser):
 class product_template(models.Model):
     _inherit = "product.template"
 
+    product_origin_id = fields.Many2one('product.template', string='Producto')
+
+    def delete_image_product_now(self):
+        for record in self:
+            if record.product_template_image_ids:
+                record.product_template_image_ids.unlink()
+
     def product_template_post(self):
         product_obj = self.env['product.template']
         company = self.env.user.company_id
@@ -2610,7 +2617,8 @@ class product_product(models.Model):
                 barcode_updated = True
                 att = { "id": att["id"], "value_name": variant.barcode }
 
-            if att:
+            #no duplicar row id
+            if att and "id" in att and att["id"]!="SIZE_GRID_ROW_ID":
                 updated_attributes.append(att)
 
         if not sku_updated and set_sku and variant.default_code:
