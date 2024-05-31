@@ -26,16 +26,32 @@ def get_price_from_pl( pricelist, product, quantity ):
 def Autocommit( self, act=False ):
     self._cr.autocommit(act)
     return False
-    
-def UpdateProductType( product ):  
-    if (product and product.type not in ['product']):
-        try:
-            product.write( { 'type': 'product' } )
-        except Exception as e:
-            _logger.info("Set type almacenable ('product') not possible:")
-            _logger.error(e, exc_info=True)
-            pass;        
-    
+
+def UpdateProductType( product ):
+    if not product:
+        return
+    for prod in product:
+        if (prod and prod.detailed_type not in ['product']):
+            failed = False
+            try:
+                prod.write( { 'detailed_type': 'product' } )
+            except Exception as e:
+                _logger.info("Set detailed_type almacenable ('product') not possible:")
+                _logger.error(e, exc_info=True)
+                failed = True
+                pass;
+            try:
+                prod.write( { 'type': 'product' } )
+            except Exception as e:
+                _logger.info("Set type almacenable ('product') not possible:")
+                _logger.error(e, exc_info=True)
+                failed = True
+                pass;
+
+            query = """UPDATE product_template SET type='product', detailed_type='product' WHERE id=%i""" % (prod.id)
+            cr = prod._cr
+            respquery = cr.execute(query)
+
 def ProductType():
     return { "type": "product" }
 
@@ -234,14 +250,16 @@ def get_delivery_line(sorder):
                 delivery_line = line
                 return delivery_line
 
-        delivery_lines = self.env['sale.order.line'].search([('order_id', 'in', sorder.ids), ('is_delivery', '=', True)])
+        delivery_lines = sorder.env['sale.order.line'].search([('order_id', 'in', sorder.ids), ('is_delivery', '=', True)])
         if delivery_lines:
             delivery_line = delivery_lines[0]
             return delivery_line
 
-    except:
-        _logger.info("Error get delivery line failed")
-        return delivery_line
+    except Exception as E:
+        _logger.info("Error get delivery line failed "+str(E))
+        pass;
+
+    return delivery_line
 
 
 

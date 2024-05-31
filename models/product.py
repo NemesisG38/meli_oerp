@@ -65,6 +65,13 @@ class MyHTMLParser(HTMLParser):
 class product_template(models.Model):
     _inherit = "product.template"
 
+    #product_origin_id = fields.Many2one('product.template', string='Producto')
+
+    def delete_image_product_now(self):
+        for record in self:
+            if record.product_template_image_ids:
+                record.product_template_image_ids.unlink()
+
     def product_template_post(self):
         product_obj = self.env['product.template']
         company = self.env.user.company_id
@@ -1721,7 +1728,12 @@ class product_product(models.Model):
             published_att_variants = self._get_variations( rjson['variations'])
             _logger.info("after _get_variations > product_template.product_variant_ids: "+str(product_template.product_variant_ids))
             #reset product....since variants changed
-            product = product_template.product_variant_ids and product_template.product_variant_ids[0]
+            update_pvid = True
+            for pv in product_template.product_variant_ids:
+                if product.id==pv.id:
+                    update_pvid = False
+            if update_pvid:
+                product = product_template.product_variant_ids and product_template.product_variant_ids[0]
 
         #_logger.info("product_uom_id")
         product_uom_id = uomobj.search([('name','=','Unidad(es)')])
