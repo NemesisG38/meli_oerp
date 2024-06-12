@@ -48,6 +48,7 @@ from .versions import *
 from html.parser import HTMLParser
 
 class MyHTMLParser(HTMLParser):
+
     full_text = ""
 
     def handle_starttag(self, tag, attrs):
@@ -63,6 +64,7 @@ class MyHTMLParser(HTMLParser):
         self.full_text+= str(data)
 
 class product_template(models.Model):
+
     _inherit = "product.template"
 
     #product_origin_id = fields.Many2one('product.template', string='Producto')
@@ -3840,7 +3842,7 @@ class product_product(models.Model):
     #post only fields
     meli_post_required = fields.Boolean(string='Publicable', help='Este producto es publicable en Mercado Libre')
     meli_id = fields.Char(string='ML Id', help='Id del item asignado por Meli', size=256, index=True)
-    meli_description_banner_id = fields.Many2one("mercadolibre.banner",string="Description Banner")
+    #meli_description_banner_id = fields.Many2one("mercadolibre.banner",string="Description Banner")
     meli_buying_mode = fields.Selection(string='Método',help='Método de compra',selection=[("buy_it_now","Compre ahora"),("classified","Clasificado")])
     meli_price_fixed = fields.Boolean(string='Price is fixed')
     meli_available_quantity = fields.Integer(string='Cantidades', help='Cantidad disponible a publicar en ML')
