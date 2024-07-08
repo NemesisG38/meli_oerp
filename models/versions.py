@@ -47,7 +47,7 @@ def UpdateProductType( product ):
     if not product:
         return
     for prod in product:
-        if (prod and prod.detailed_type not in ['product']):
+        if (prod and "detailed_type" in prod._fields and prod.detailed_type not in ['product']):
             failed = False
             try:
                 prod.write( { 'detailed_type': 'product' } )
@@ -56,6 +56,9 @@ def UpdateProductType( product ):
                 _logger.error(e, exc_info=True)
                 failed = True
                 pass;
+
+        if (prod and "type" in prod._fields and prod.type not in ['product']):
+            failed = False
             try:
                 prod.write( { 'type': 'product' } )
             except Exception as e:
@@ -64,9 +67,9 @@ def UpdateProductType( product ):
                 failed = True
                 pass;
 
-            query = """UPDATE product_template SET type='product', detailed_type='product' WHERE id=%i""" % (prod.id)
-            cr = prod._cr
-            respquery = cr.execute(query)
+            #query = """UPDATE product_template SET type='product', detailed_type='product' WHERE id=%i""" % (prod.id)
+            #cr = prod._cr
+            #respquery = cr.execute(query)
 
 def ProductType():
     return { "type": "product" }
