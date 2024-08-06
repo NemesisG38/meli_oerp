@@ -4,10 +4,10 @@ from odoo import fields, osv, models, api
 import odoo.addons.decimal_precision as dp
 
 class SaleOrder(models.Model):
-    
+
     _inherit = "sale.order"
 
-    meli_order_id = fields.Many2one('mercadolibre.orders', u'Meli Order Id', 
+    meli_order_id = fields.Many2one('mercadolibre.orders', u'Meli Order Id',
         copy=False, readonly=True)
     meli_status = fields.Selection( [
         #Initial state of an order, and it has no payment yet.
@@ -48,7 +48,7 @@ class SaleOrder(models.Model):
         ('not_specified','No especificado'),
         ('stale_ready_to_ship','A Punto de Enviar'),
         ('stale_shipped','Enviado'),
-    ], string=u'Estado de Entrega', index=True, readonly=True, related='meli_order_id.shipping_status', store=True)
+    ], string=u'Estado de Entrega', index=True, readonly=True, related='meli_order_id.shipping_status', store=False)
     shipping_substatus = fields.Selection([
         #subestados de pending
         ('cost_exceeded','Costo Exedido'),
@@ -125,7 +125,7 @@ class SaleOrder(models.Model):
         ('return_expired','Devuelto por expiracion'),
         ('return_session_expired','Sesion de devolucion expirada'),
         ('unfulfillable','Imposible de llenar'),
-    ], string=u'Estado de Impresion/Entrega', index=True, readonly=True, related='meli_order_id.shipping_substatus', store=True)
+    ], string=u'Estado de Impresion/Entrega', index=True, readonly=True, related='meli_order_id.shipping_substatus', store=False)
     shipping_mode = fields.Selection([
         ('me2','Mercado Envio'),
     ], string=u'Metodo de envio', readonly=True)
@@ -134,14 +134,14 @@ class SaleOrder(models.Model):
 #        'buyer': fields.many2one( "mercadolibre.buyers","Buyer"),
 #       'meli_seller': fields.text( string='Seller' ),
 
-    
+
     def action_print_tag_delivery(self):
         meli_orders = self.mapped('meli_order_id').filtered(lambda x: x.status == 'paid')
         if meli_orders:
             return meli_orders.action_print_tag_delivery()
 
 class SaleOrderLine(models.Model):
-    
+
     _inherit = "sale.order.line"
 
     meli_order_item_id = fields.Char('Meli Order Item Id')

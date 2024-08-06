@@ -619,7 +619,9 @@ class mercadolibre_orders(models.Model):
 
         if ( Buyer and 'billing_info' in Buyer and 'STATE_NAME' in Buyer['billing_info'] ):
             binfo = Buyer['billing_info']
-            full_state = str(('CITY_NAME' in binfo and binfo['CITY_NAME']) or '')
+            full_state = str(('STATE_NAME' in binfo and binfo['STATE_NAME']) or '')
+            if (full_state=="Capital Federal"):
+                full_state = "Ciudad Autónoma de Buenos Aires"
             state = self.env['res.country.state'].search(['&',('name','ilike',full_state),('country_id','=',country_id)])
             if (len(state)):
                 state_id = state[0].id
@@ -1139,8 +1141,10 @@ class mercadolibre_orders(models.Model):
         if 'buyer' in order_json:
             Buyer = order_json['buyer']
             Buyer['billing_info'] = self.get_billing_info(order_id=order_json['id'],meli=meli,data=order_json)
-            Buyer['first_name'] = ('first_name' in Buyer and Buyer['first_name']) or ('FIRST_NAME' in Buyer['billing_info'] and Buyer['billing_info']['FIRST_NAME']) or ''
-            Buyer['last_name'] = ('last_name' in Buyer and Buyer['last_name']) or ('LAST_NAME' in Buyer['billing_info'] and Buyer['billing_info']['LAST_NAME']) or ''
+            #Buyer['first_name'] = ('first_name' in Buyer and Buyer['first_name']) or ('FIRST_NAME' in Buyer['billing_info'] and Buyer['billing_info']['FIRST_NAME']) or ''
+            #Buyer['last_name'] = ('last_name' in Buyer and Buyer['last_name']) or ('LAST_NAME' in Buyer['billing_info'] and Buyer['billing_info']['LAST_NAME']) or ''
+            Buyer['first_name'] = ('FIRST_NAME' in Buyer['billing_info'] and Buyer['billing_info']['FIRST_NAME']) or ('first_name' in Buyer and Buyer['first_name']) or ''
+            Buyer['last_name'] = ('LAST_NAME' in Buyer['billing_info'] and Buyer['billing_info']['LAST_NAME']) or ('last_name' in Buyer and Buyer['last_name']) or ''
             Buyer['business_name'] = ('business_name' in Buyer and Buyer['business_name']) or ('BUSINESS_NAME' in Buyer['billing_info'] and Buyer['billing_info']['BUSINESS_NAME']) or ''
             Receiver = False
             if ('shipping' in order_json and order_json['shipping']):
@@ -1176,6 +1180,8 @@ class mercadolibre_orders(models.Model):
                                 Receiver = shpjson["receiver_address"]
             #_logger.info("Buyer:"+str(Buyer) )
             #_logger.info(order_json)
+            #_logger.info("Buyer:"+str(Buyer) )
+            #_logger.info("Receiver:"+str(Receiver) )
             meli_buyer_fields = {
                 'name': self.buyer_full_name(Buyer),
                 'street': self.street(Receiver,Buyer),
@@ -1616,7 +1622,9 @@ class mercadolibre_orders(models.Model):
                     "zip": self.zip_code(Receiver, Buyer),
                     "name": self.buyer_full_name(Buyer),
                 })
-                #_logger.info(billing_partner_update: "+str(billing_partner_update))
+                #_logger.info("billing_partner_update: "+str(billing_partner_update))
+                #_logger.info("Buyer: "+str(Buyer))
+                #_logger.info("Receiver: "+str(Receiver))
 
             if ("fe_regimen_fiscal" in self.env['res.partner']._fields):
                 if (partner_id and not partner_id.fe_regimen_fiscal):
@@ -1644,7 +1652,7 @@ class mercadolibre_orders(models.Model):
                     partner_update = self.update_partner_billing_info( partner_id=partner_invoice_id, meli_buyer_fields=partner_update, Receiver=Receiver )
                     if partner_update:
                         try:
-                            #_logger.info(Partner Invoice Updating: "+str(partner_update))
+                            #_logger.info("Partner Invoice Updating: "+str(partner_update)+ str(" partner_invoice_id:")+str(partner_invoice_id))
                             partner_invoice_id.write(partner_update)
                         except Exception as e:
                             #_logger.info("orders_update_order > Error actualizando Partner Invoice Id:"+str(e))
@@ -1694,7 +1702,7 @@ class mercadolibre_orders(models.Model):
                     #_logger.info("partner_update BILLING INFO: " + str(billing_partner_update) )
 
                 if partner_update:
-                    #_logger.info(Updating partner: "+str(partner_update))
+                    #_logger.info("Updating partner: "+str(partner_update))
                     try:
                         partner_id.write(partner_update)
                         self._cr.commit()
