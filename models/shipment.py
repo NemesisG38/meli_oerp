@@ -383,6 +383,10 @@ class mercadolibre_shipment(models.Model):
         for shipment in self:
             #_logger.info("_update_sale_order_shipping_info")
             sorder = shipment.sale_order
+
+            if sorder.state in ['done']:
+                continue;
+
             if (not sorder or not order):
                 continue;
 
