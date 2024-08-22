@@ -1720,10 +1720,6 @@ class mercadolibre_orders(models.Model):
                 #partner_id.write( meli_buyer_fields )
 
             if (partner_id):
-                if config.mercadolibre_cron_get_orders_shipment_client:
-                    partner_shipping_id = self.env["mercadolibre.shipment"].partner_delivery_id( partner_id=partner_id, Receiver=Receiver)
-
-            if (partner_id):
                 if ("fe_habilitada" in self.env['res.partner']._fields):
                     try:
                         partner_id.write( { "fe_habilitada": True } )
@@ -1740,6 +1736,14 @@ class mercadolibre_orders(models.Model):
                 _logger.error("No partner founded or created for ML Order" )
                 return {'error': 'No partner founded or created for ML Order' }
 
+        original_contact_partner_id = partner_id
+
+        if (original_contact_partner_id):
+            if config.mercadolibre_cron_get_orders_shipment_client:
+                partner_shipping_id = self.env["mercadolibre.shipment"].partner_delivery_id( partner_id=original_contact_partner_id,
+                                                                                            Receiver=Receiver,
+                                                                                            config=config)
+
         #process base order fields
         #asignar datos de invoicing predeterminado....(mexico)
         mercadolibre_contact_partner_id = ("mercadolibre_contact_partner" in config._fields and config.mercadolibre_contact_partner)
@@ -1750,7 +1754,7 @@ class mercadolibre_orders(models.Model):
         if (mercadolibre_invoice_partner_id):
             mercadolibre_invoice_partner_id.meli_update_forbidden = True
 
-        mercadolibre_shipping_partner_id = ("mercadolibre_shipping_partner" in config._fields and config.mercadolibre_invoice_partner)
+        mercadolibre_shipping_partner_id = ("mercadolibre_shipping_partner" in config._fields and config.mercadolibre_shipping_partner_id)
         if (mercadolibre_shipping_partner_id):
             mercadolibre_shipping_partner_id.meli_update_forbidden = True
 
