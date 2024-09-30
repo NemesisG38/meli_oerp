@@ -1178,7 +1178,10 @@ class mercadolibre_shipment(models.Model):
     def update_item( self, item=None ):
         shipment = self
         sitem = None
-        #_logger.info("update shipment:"+str(item))
+        if not item or not "order_id" in item or not "item_id" in item:
+            return None
+
+        _logger.info("update shipment:"+str(item))
         if "variation_id" in item and item["variation_id"]:
             sitem = self.env["mercadolibre.shipment.item"].search([ ("shipment_id","=",shipment.id),("order_id","=",item["order_id"]), ("item_id","=",item["item_id"]), ("variation_id","=",item["variation_id"]) ],limit=1)
         else:
